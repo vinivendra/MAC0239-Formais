@@ -1,0 +1,30 @@
+O objetivo deste exercício programa é criar um arquivo que possa ser lido por um resolvedor sat e que dê a resposta certa para um sudoku dado.
+Para isso foi usada a ideia do enunciado de, para cada célula da tabela, criar nove variáveis, cada uma representando a presença de um determinado dígito naquela célula. Dessa forma, ficamos com 9x9 células, cada uma com 9 variáveis, ou seja, 9³=729 variáveis no total. Se uma variável vale 1, então aquele é o número presente na célula.
+Usando essa notação para as variáveis, temos que:
+    Em uma célula, os dígitos são números seguidos. Ex.: na primeira célula, as variáveis são (1, 2, 3, 4, 5, 6, 7, 8, 9).
+    Em uma linha, um mesmo dígito é representado pulando de 9 em 9: (1, 10, 19 … 82).
+    Em uma coluna, um mesm dígito é representado pulando de 81 em 81: (1, 81 …).
+Sendo assim, e seguindo as regras do sudoku, chega-se a um conjunto básico de regras que devem ser obedecidas: cada célula deve ter exatamente um dígito (exatamente uma variável com valor 1, e as outras com 0) e cada linha, coluna e bloco deve ter exatamente uma variável com valor 1 para cada dígito (chamamos de bloco cada uma das nove regiões delimitadas por um quadrado 3x3, destacado no tabuleiro).
+Para poder representar logicamente a ideia de "exatamente um dígito", usamos uma combinação de outras duas ideias: "pelo menos um dígito" e "no máximo um dígito". Afinal, n ≥ 1 e n ≤ 1 ⇒ n = 1. Essas ideias são mais simples, na cnf:
+    "Pelo menos um dígito" é representado por um ou lógico entre as 9 variáveis: a ∨ b ∨ c ∨ … ∨ i.
+    "No máximo um dígito" é representado por um ou lógico entre as 9 variáveis duas a duas: a ∨ b, b ∨ c, a ∨ c, … h ∨ i.
+    Uma simples tabela da verdade comprova que essas ideias podem ser representadas por essas expressões.
+Logo, se determinarmos que devemos ter "exatamente um dígito" por célula, por linha, por coluna e por bloco, temos a estrutura básica de um sudoku vazio, faltando apenas inserir as dicas (os números dados na entrada).
+
+Para isso, o algoritmo é mais simples. Digamos que na célula (1,1) temos a dica 5. então sabemos que:
+    Na célula (1,1) não temos nenhum outro dígito que não o 5.
+    Na linha 1, nenhuma outra célula tem o 5.
+    Na coluna 1, nenhuma outra célula tem o 5.
+    No bloco que contém a célula (1,1), nenhuma outra célula tem o 5.
+Portanto, na cnf, basta inserir como cláusulas a negações de tudo aquilo que não queremos que aconteça. Como não queremos que haja nenhum outro número na mesma célula que não o 5, sabemos que o calor da variável 1 deve ser 0, assim como todos os outros até o 9, excluindo o próprio 5. Então, inserimos como cláusulas:
+    Para a célula 1: -1, -2 … -4, -6 … -9.
+    Para a linha 1: -14 (5 na 2ᵃ célula), -23 (5 na 3ᵃ), … -86.
+    Para a coluna 1: -85 (5 na 2ᵃ célula), …
+    Idem para o mesmo bloco, novamente excluindo a célula (1,1).
+    
+Para imprimir o cabeçalho do arquivo de saída (a linha "p cnf [variáveis] [cláusulas]"), é necessário saber quantas cáusulas temos. Para isso, é necessário saber quantas dicas temos, já que a cada dica vamos adicionar cláusulas. Isso é feito da seguinte forma:
+    Empiricamente, a construção inicial do sudoku vazio nos dá 11259 cláusulas.
+    Como mostrado anteriormente, para cada dica temos 8 cláusulas para a célula, 8 para a linha, 8 para a coluna e 8 para o bloco, totalizando 32 cláusulas por dica.
+Logo, basta contar da entrada quantas dicas temos (quantos números são diferentes de 0), multiplicar o resultado por 32 e somar aos 11259 iniciais.
+
+Uma vez que o cabeçalho foi impresso, resta apenas inserir as cláusulas conforme foi detalhado. Para isso, usamos o modo mais intuitivo, que envolve percorrer variáveis, linhas, colunas e blocos para criar as cláusulas desejadas (esta parte está melhor comentada no código). Um detalhe que vale a pena mencionar é que usamos AAAAAAAAIALDBFILDKJBCNV:AKUDSBFCV:ISDJBFN
