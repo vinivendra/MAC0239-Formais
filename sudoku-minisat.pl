@@ -3,6 +3,14 @@
 use warnings;
 use strict;
 
+#
+# VARIÁVEL USADA PARA GUARDAR O CAMINHO DO MINISAT.
+# MUDE O SEU VALOR SE ELE NÃO FOR UM COMANDO AUTOMÁTICO
+#
+
+my $miniSatPath = "minisat";
+
+
 # Matriz usada na leitura da entrada
 my @sudoku = ([], [], [], [], [], [], [], [], []);
 
@@ -14,6 +22,7 @@ my $l;
 my $m;
 my $n;
 my $o;
+my $a;
 
 # Variável para facilitar nos cálculos
 my $base = 0;
@@ -21,7 +30,7 @@ my $base = 0;
 
 
 # Leitura da entrada
-my $a = (<>);
+$a = (<>);
 
 for ($i = 0; $i < 9; $i++) {        # $a deve ter 81 dígitos, então percorremos 9x9
     for ($j = 0; $j < 9; $j++) {
@@ -70,22 +79,22 @@ for ($i = 0; $i < 9; $i ++) {    # Percorre a matriz; para cada dica encontrada,
         if ($sudoku[$i][$j] != 0) {
             
             for ($k = 0; $k < 9; $k++) {    # Cláusulas para a mesma célula
-                                            # $k percorre as variáveis de todos os números da célula
+                # $k percorre as variáveis de todos os números da célula
                 if ($k + 1 != $sudoku[$i][$j]) {    # Fazemos a negação de todos os OUTROS números
                     print SAIDA "-".($i*81 + $j*9 + $k + 1)." 0\n";
                 }
             }
             
             for ($k = 0; $k < 9; $k ++) {   # Para o mesmo número na mesma linha
-                							# $k percorre cada célula da linha
+                # $k percorre cada célula da linha
                 if ($k != $j) {    			# Fazemos a negação de todas as OUTRAS células da mesma linha,
-                                            # ou seja, excluindo a célula (i,j)
+                    # ou seja, excluindo a célula (i,j)
                     print SAIDA "-".($i*81 + $k*9 + $sudoku[$i][$j])." 0\n";
                 }
             }
             
             for ($k = 0; $k < 9; $k ++) {   # Para o mesmo número na mesma coluna
-                							# $k Percorre cada célula da coluna
+                # $k Percorre cada célula da coluna
                 if ($k != $i) {   		    # Fazemos a negação de todas as OUTRAS células da mesma coluna
                     print SAIDA "-".($j*9 + $k*81 + $sudoku[$i][$j])." 0\n";
                 }
@@ -227,6 +236,90 @@ for ($i = 0; $i < 3; $i ++) {                   # Para cada linha de blocos
 #
 
 
-
 close (SAIDA);
 
+
+
+#
+# Execução do sat solver (minisat)
+#
+
+my $result;
+my $solucao;
+
+
+# result guarda o que o programa retornar, para sabermos se funcionou ou não
+# Essa expressão diz para o minisat resolver o conteúdo do arquivo saida.txt e
+# guardar a solucao no arquivo solucao.txt.
+$result = `$miniSatPath saida.txt solucao.txt`;
+
+# Se não conseguirmos rodar o minisat, sabemos que pelo menos o arquivo de saída
+# já foi gerado; imprimimos uma mensagem de erro e encerramos o programa.
+if (!$result) {
+    print "Nao foi possível executar o minisat; certifique-se de que o caminho está correto e tente novamente.\n";
+    exit -1;
+}
+
+# Leitura do arquivo de solução
+open SOLUCAO, "solucao.txt" or die $!;
+
+# A primeira linha indica se o sudoku é satisfazível ou não.
+# Se não for, imprimimos o resultado e saimos do programa.
+$solucao = <SOLUCAO>;
+if (!($solucao =~ /\bSAT/)) {
+    print "O sudoku dado não pode ser resolvido (UNSAT).\n";
+    exit 1;
+}
+
+# Se for, a segunda linha contém a solução
+$solucao = <SOLUCAO>;
+
+
+#
+# Impressão da solução
+#
+
+my @answer;
+
+# Lemos as variáveis e guardamos tudo numa lista (@answer)
+for ($l = 0; $l < 729; $l ++) {
+    if ($solucao =~ s/([-]?[\d]+)//) {
+        $answer[$l] = $1;
+    }
+}
+
+$l = 0;
+
+# Imprimimos o sudoku
+print "┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓\n";
+
+for ($i = 0; $i < 9; $i++) {
+    for ($j = 0; $j < 9; $j++) {
+        if ($j%3 == 0) { print "┃"; }
+        else { print "│"; }
+        for ($k = 0; $k < 9; $k++) {
+            if ($answer[$l] > 0) {
+                $answer[$l] = $answer[$l]%9;
+                if ($answer[$l] == 0) { $answer[$l] = 9; }
+                print " ".$answer[$l]." ";
+            }
+            
+            $l ++;
+        }
+        
+    }
+    print "┃\n";
+    if ($i != 8) {
+        if ($i%3 != 2) { print "┠───┼───┼───╂───┼───┼───╂───┼───┼───┨\n"; }
+        else { print "┣━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┫\n"; }
+    }
+}
+print "┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛\n";
+
+
+
+#
+# Encerramento do programa
+#
+
+close SOLUCAO

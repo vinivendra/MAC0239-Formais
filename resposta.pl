@@ -3,10 +3,6 @@
 use warnings;
 use strict;
 
-# Tabuleiro
-my @cell;
-
-
 # Contadores
 my $i;
 my $j;
@@ -22,6 +18,7 @@ my $base = 0;
 
 $a = (<>);
 
+# Lemos as variáveis e guardamos tudo numa lista (@answer)
 for ($l = 0; $l < 729; $l ++) {
     if ($a =~ s/([-]?[\d]+)//) {
         $answer[$l] = $1;
@@ -30,6 +27,7 @@ for ($l = 0; $l < 729; $l ++) {
 
 $l = 0;
 
+# Imprimimos o sudoku
 print "┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓\n";
 
 for ($i = 0; $i < 9; $i++) {

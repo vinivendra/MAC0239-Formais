@@ -9,7 +9,7 @@ Para poder representar logicamente a ideia de "exatamente um dígito", usamos um
     "Pelo menos um dígito" é representado por um ou lógico entre as 9 variáveis: a ∨ b ∨ c ∨ … ∨ i.
     "No máximo um dígito" é representado por um ou lógico entre as 9 variáveis duas a duas: a ∨ b, b ∨ c, a ∨ c, … h ∨ i.
     Uma simples tabela da verdade comprova que essas ideias podem ser representadas por essas expressões.
-Logo, se determinarmos que devemos ter "exatamente um dígito" por célula, por linha, por coluna e por bloco, temos a estrutura básica de um sudoku vazio, faltando apenas inserir as dicas (os números dados na entrada).
+Logo, se determinarmos que devemos ter "exatamente um dígito" por célula, por linha, por coluna e por bloco, temos a estrutura básica de um sudoku vazio, faltando apenas inserir as dicas (os números dados na entrada). Isso tudo é feito no programa sudoku.pl.
 
 Para isso, o algoritmo é mais simples. Digamos que na célula (1,1) temos a dica 5. então sabemos que:
     Na célula (1,1) não temos nenhum outro dígito que não o 5.
@@ -27,4 +27,18 @@ Para imprimir o cabeçalho do arquivo de saída (a linha "p cnf [variáveis] [cl
     Como mostrado anteriormente, para cada dica temos 8 cláusulas para a célula, 8 para a linha, 8 para a coluna e 8 para o bloco, totalizando 32 cláusulas por dica.
 Logo, basta contar da entrada quantas dicas temos (quantos números são diferentes de 0), multiplicar o resultado por 32 e somar aos 11259 iniciais.
 
-Uma vez que o cabeçalho foi impresso, resta apenas inserir as cláusulas conforme foi detalhado. Para isso, usamos o modo mais intuitivo, que envolve percorrer variáveis, linhas, colunas e blocos para criar as cláusulas desejadas (esta parte está melhor comentada no código). Um detalhe que vale a pena mencionar é que usamos AAAAAAAAIALDBFILDKJBCNV:AKUDSBFCV:ISDJBFN
+Uma vez que o cabeçalho foi impresso, resta apenas inserir as cláusulas conforme foi detalhado. Para isso, usamos o modo mais intuitivo, que envolve percorrer variáveis, linhas, colunas e blocos para criar as cláusulas desejadas (esta parte está melhor comentada no código). Um detalhe que vale a pena mencionar é que usamos uma variável auziliar chamada base, que representa sempre o número da variável imediatamente anterior à célula em questão. Por exemplo: se estamos na célula (2, 2), ela terá 9 variáveis: 90, 91, 92, 93, … e 98. Logo, para simplificar o código, dizemos que a base deve ser 89 (que é imediatamente antes de 90, a primeira variável) e fazemos todas as contas com relação a essa base.
+
+Uma vez que todas as cláusulas foram impressas, basta fechar o arquivo e encerrar o programa. O arquivo gerado por esse programa está pronto para ser lido pelo zchaff, que deverá retornar um conjunto de valorações que satisfaz o sudoku (caso ele seja satisfazível). Para interpretar esse resultado, foi criado o arquivo resposta.pl. Basta passar as valorações dadas pelo zchaff para o programa e ele imprime na tela o tabuleiro de sudoku, de um modo mais facilmente visualizável.
+
+Modo de utilização: 
+    Para utilizar o programa sudoku.pl, basta digitar "perl sudoku.pl < entrada.txt", sendo entrada.txt um arquivo com a sequência de números conforme dada no enunciado. No exemplo fornecido, o conteúdo de entrada.txt seria:
+    53007000060019500009800006080006 00034008030017000200060600002800 00419005000080079
+    conforme copiado diretamente do pdf. A saída deste programa é o objetivo principal do programa; o resto não é essencial.
+    Para utilizar o programa resposta.pl, basta digitar "perl resposta.pl < answer.pl", sendo answer.pl um arquivo contendo a valoração retornada pelo zchaff. No caso de exemplo do enunciado, o conteúdo do arquivo seria algo como:
+    -1 -2 -3 -4 5 -6 -7 -8 -9 -10 … -727 -728 729
+    conforme extraído diretamente da saída do terminal ao rodar o comando "zchaff saida.txt", sendo saida.txt o arquivo gerado pelo programa sudoku.pl com a entrada entrada.txt, conforme o comando mencionado acima.
+    
+O zip entregue no paca inclui ambos os programas (sudoku.pl e resposta.pl), assim como instâncias de arquivos entrada.txt, saida.txt e answer.txt, referentes ao exemplo do enunciado, e este relatório.
+
+Além disso, incluímos uma versão mais completa do programa, mas que em vez de usar o zchaff usa o minisat. Esse programa (sudoku-minisat.pl) essencialmente executa os mesmos passos do sudoku.pl, passa o arquivo pelo minisat e manda o resultado pelo mesmo algoritmo do resposta.pl, transformando todos os passos anteriores em um só (executar "perl sudoku-minisat.pl entrada.txt"). Esse é o nosso modo de "chamar a api em c 
