@@ -1,5 +1,13 @@
 #!/usr/bin/perl
 
+#
+# Mateus Barros Rodrigues - 7991037
+# Vinícius Jorge Vendramini - 7991103
+#
+# EP1 - 2013
+#
+
+
 use warnings;
 use strict;
 

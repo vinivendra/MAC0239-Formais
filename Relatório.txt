@@ -42,4 +42,4 @@ Modo de utilização:
 O zip entregue no paca inclui ambos os programas (sudoku.pl e resposta.pl), assim como instâncias de arquivos entrada.txt, saida.txt e answer.txt, referentes ao exemplo do enunciado, e este relatório.
 
 Além disso, incluímos uma versão mais completa do programa, mas que em vez de usar o zchaff usa o minisat. Esse programa (sudoku-minisat.pl) essencialmente executa os mesmos passos do sudoku.pl, passa o arquivo pelo minisat e manda o resultado pelo mesmo algoritmo do resposta.pl, transformando todos os passos anteriores em um só (executar "perl sudoku-minisat.pl entrada.txt"). Esse é o nosso modo de "chamar a api em c do zchaff", mas optamos por fazer o programa em perl e por usar o minisat, que tem uma resposta mais facilmente legível.
-O arquivo gerado pelo sudoku.pl, que é o principal, pode ser lido tanto pelo zchaff quanto pelo minisat.
+O arquivo gerado pelo sudoku.pl, que é o principal, pode ser lido tanto pelo zchaff quanto pelo minisat. Uma instância do arquivo solucao.txt também está no zip.
