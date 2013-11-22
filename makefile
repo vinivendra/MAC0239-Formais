@@ -1,2 +1,2 @@
 all:
-	pp -o ep sudoku.pl
+	pp -o ep ep2.pl
