@@ -10,11 +10,22 @@
 # GG
 
 use warnings;
+use List::MoreUtils qw(firstidx);
+
+our %variaveis;
+our $ultima_linha = "";
+
+our @saida;
+our $k;
 
 my @intervalos;
 my @linhas;
 
 my $num_vars = 0;
+
+my %cnf;
+
+my $c = firstidx { $_ eq "-c" } @ARGV;
 
 while (<>) {
     
@@ -22,7 +33,9 @@ while (<>) {
     if ($_ =~ /([A-Z]+)\:\s+(\d+)\s+(\d+)\./) {
         # Nova Variável
         # $1 = nome da variável, $2 = começo do domínio, $3 = final do domínio.
+        
         $intervalos[$num_vars] = [$1, $2, $3];
+        
         $num_vars ++;
     }
     else {
@@ -32,62 +45,192 @@ while (<>) {
     
 }
 
-itera($num_vars, \%intervalos, @valores);
+my $i;
+
+# Para cada uma das linhas, imprime as combinações
+for ($i = 0; $i < @linhas; $i++) {
+    itera($num_vars, $linhas[$i], @intervalos, @valores);
+}
+
+
+
+if ($c >= 0) {
+    $k = 0;
+    
+    while(($a = $saida[$k++]) && ($k < @saida)) {
+        while ($a =~ s/([a-z]+\([^a-z]+\))//) {
+            $cnf{$1} = 1;
+        }
+    }
+    
+    my $var;
+    my @vars = sort keys %cnf;
+    $k = 0;
+    
+    while($k < @saida) {
+        $a = $saida[$k];
+        
+        while ($a =~ /([a-z]+\([^a-z]+\))/) {
+            $i = firstidx { $_ eq $1 } @vars;
+            $i++;
+            $a =~ s/[a-z]+\([^a-z]+\)/$i/;
+        }
+        
+        $a =~ s/(.*)\./$1 0/;
+        
+        $saida[$k] = $a;
+        
+        $k++;
+    }
+}
+
+open (SAIDA, '>saida.txt');
+print SAIDA @saida;
+close (SAIDA);
 
 
 
 
 
 
-#    GG
 
 
+
+
+
+
+
+# Subrotina recursiva para possibilitar a impressão de todas as combinações de variáveis.
+# 
+# A cada passo da recursão se escolhe uma variável e se cria uma iteração
+# sobre os possíveis valores que essa variável pode tomar. Por exemplo, se a variável X
+# pode ir de 1 a 3, criamos um for de 1 a 3. A cada passo do for guardamos o valor atual de
+# X num vetor e passamos esse vetor para o próximo passo da recursão.
+# 
+# Quando todas as variáveis estiverem com seus valores decididos, ou seja, dentro do último
+# for, imprimimos a linha em questão com os valores das variáveis.
 sub itera {
     
-    print "HUE\n";
+    my $num_vars = shift;       # Número total de variáveis
+    my $linha = shift;          # String contendo a linha em que vamos substituir os valores
+    my $intervalos = shift;     # Vetor contendo os nomes das variáveis e seus respectivos domínios
+    my $valores = shift;        # Vetor contendo os valores das variáveis que já foram "decididos" até agora
     
-    my $num_vars = shift;
-    my $hash = shift;
-    my $array = shift;
-        
-    my @intervalos = \$hash;
-    my @valores = \$array;
+    my $key = 0;                # Posição no vetor da variável que vamos iterar nesse passo da recursão
     
-    my $key = 0;
-        
-    print "Kelly ".$key."\n";
-        
+    # Descobre qual deve ser o valor de key
     while ($key < $num_vars) {
         if (defined $valores[$key]) {
-            print "valores [".$key."] = ".$valores[$key]."\n";
             $key = $key + 1;
         }
         else {
             last;
         }
     }
-    # key agora é a posição da primeira variável indefinida
     
-    print "Kelly ".$key."\n";
-    
-    print "Kelly\n";
-    
+    # Key agora é a posição da primeira variável indefinida
+    # Se já tivemos ocupado todas as variáveis, basta imprimir:
     if ($num_vars == $key) {
-        # Fim da recursão; substitui os valores e GG.
-        print @valores."\n";
+        imprime($num_vars, $linha, @intervalos, @valores);
     }
+    # Se ainda precisar fazer mais vezes
     else {
-        # Faz a recursão mais uma vez.
         my $i;
-        for ($i = $intervalos[$key][1]; $i < $intervalos[$key][2]; $i++) {
+        
+        # Faz a iteração dentro do intervalo da variável
+        for ($i = $intervalos[$key][1]; $i <= $intervalos[$key][2]; $i++) {
+            # Coloca o valor da variável no nosso vetor de variáveis
             $valores[$key] = $i;
-            itera($num_vars, @intervalos, @valores);
+            # Chama o próximo passo da recursão
+            itera($num_vars, $linha, @intervalos, @valores);
         }
         
+        # Retira o valor da variável atual para poder voltar no passo anterior da recursão
         $valores[$key] = undef;
     }
     
 }
+
+
+
+
+
+# Subrotina para substituir os valores da variável na linha e imprimi-la
+#
+# Para isso, vamos usar um hash (%variaveis) que relaciona o nome da variável (key)
+# com seu valor.
+sub imprime {
+    
+    my $num_vars = shift;
+    my $linha = shift;
+    my $intervalos = shift;
+    my $valores = shift;
+    
+    my $i;
+    
+    # Coloca os valores atuais das variáveis no nosso hash de variáveis
+    for ($i = 0; $i < @intervalos; $i++) {
+        $variaveis{$intervalos[$i][0]} = $valores[$i];
+    }
+    
+    
+    my $a = $linha; 
+    my $b;
+    my @restricoes;
+    my $j = 0;
+    
+    $a =~ s/(.*)[^\.]$/$1./;
+    
+    # Retira as restrições da linha e guarda elas no vetor
+    while ($a =~ /(.*\.)(.*[,])?(\s*[A-Z]+.*[,\.])/) {
+        if (defined $2) {
+            $a =~ s/(.*\.)(.*[,])?(\s*[A-Z]+.*[,\.])/$1$2/;
+        }
+        else {
+            $a =~ s/(.*\.)(.*[,])?(\s*[A-Z]+.*[,\.])/$1/;
+        }
+        
+        $b = $3;
+        $b =~ s/(.*)[,.]/$1/;
+        $restricoes[$j++] = $b;
+    }
+    
+    
+    my $pode_imprimir = 1;
+    for ($j = 0; $j < @restricoes; $j++) {
+        while ($restricoes[$j] =~ s/([A-Z]+)/$variaveis{$1}/) {
+        }
+        
+        $restricoes[$j] =~ s/^([^\!\>\<]*)\=(.*)/$1\=\=$2/;
+                
+        if(!(eval $restricoes[$j])) {
+            $pode_imprimir = 0;
+        }
+    }
+    
+    
+    
+    if ($pode_imprimir == 1) {
+        # Substitui os valores das variáveis
+        while ($a =~ s/([A-Z]+)/$variaveis{$1}/) {
+        }
+        
+        $a =~ s/([^\.]+)(\.\.)$/$1./;
+        
+        if (!($a eq $ultima_linha)) {
+            $ultima_linha = $a;
+            
+            #Imprime a linha
+            $saida[$k++] = "$a\n";
+        }
+
+    }
+    
+
+    
+}
+
+
 
 
 
