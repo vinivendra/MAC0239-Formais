@@ -53,6 +53,7 @@ for ($i = 0; $i < @linhas; $i++) {
 }
 
 
+open (SAIDA, '>saida.txt');
 
 if ($c >= 0) {
     $k = 0;
@@ -82,9 +83,12 @@ if ($c >= 0) {
         
         $k++;
     }
+    
+    $num_variaveis = @vars;
+    $num_clausulas = @saida;
+    print SAIDA "p cnf $num_variaveis $num_clausulas\n";
 }
 
-open (SAIDA, '>saida.txt');
 print SAIDA @saida;
 close (SAIDA);
 
