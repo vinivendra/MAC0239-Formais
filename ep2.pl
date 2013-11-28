@@ -10,7 +10,7 @@
 # GG
 
 use warnings;
-use List::MoreUtils qw(firstidx);
+#use List::MoreUtils qw(firstidx);
 
 our %variaveis;
 our $ultima_linha = "";
@@ -25,7 +25,28 @@ my $num_vars = 0;
 
 my %cnf;
 
-my $c = firstidx { $_ eq "-c" } @ARGV;
+sub firstidx{
+    
+    my $quem = shift;
+    my $ondeRef = shift;
+    my @onde = @$ondeRef;
+
+
+    my $pos = 0;
+
+    while(1){
+	if($onde[$pos] eq $quem){ return $pos; }
+	if($pos >= @onde){ return -1; }
+	$pos++;
+    }
+    
+}
+
+#@hue = ("eae","cara","anda","comigo","no","lanche");
+
+#my $bla = firstidx("comigo",\@hue
+#my $c = firstidx { $_ eq "-c" } @ARGV;
+my $c = firstidx("-c",\@ARGV);
 
 while (<>) {
     
@@ -49,7 +70,7 @@ my $i;
 
 # Para cada uma das linhas, imprime as combinações
 for ($i = 0; $i < @linhas; $i++) {
-    itera($num_vars, $linhas[$i], @intervalos, @valores);
+   itera($num_vars, $linhas[$i], @intervalos, @valores);
 }
 
 
@@ -66,18 +87,20 @@ if ($c >= 0) {
     
     my $var;
     my @vars = sort keys %cnf;
+   
     $k = 0;
     
     while($k < @saida) {
         $a = $saida[$k];
         
         while ($a =~ /([a-z]+\([^a-z]+\))/) {
-            $i = firstidx { $_ eq $1 } @vars;
+            #$i = firstidx { $_ eq $1 } @vars;
+	    $i = firstidx($1,\@vars);
             $i++;
             $a =~ s/[a-z]+\([^a-z]+\)/$i/;
         }
         
-        $a =~ s/(.*)\./$1 0/;
+              $a =~ s/(.*)\./$1 0/;
         
         $saida[$k] = $a;
         
@@ -91,18 +114,6 @@ if ($c >= 0) {
 
 print SAIDA @saida;
 close (SAIDA);
-
-
-
-
-
-
-
-
-
-
-
-
 
 # Subrotina recursiva para possibilitar a impressão de todas as combinações de variáveis.
 # 
