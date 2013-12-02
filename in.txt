@@ -1,4 +1,4 @@
 X: 1 5.
 Y: 1 5.
 foo(X).
-bar(Y) -foo(X). X < Y
+-bar(Y) -foo(X). X < Y
