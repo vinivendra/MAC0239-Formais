@@ -7,10 +7,18 @@
 # EP2
 #
 
-# GG
 
 use warnings;
 #use List::MoreUtils qw(firstidx);
+
+
+
+
+#################################################################################
+#
+# Declarações de variáveis
+#
+#################################################################################
 
 
 # Hash que guarda os nomes das variáveis (keys) e seus valores
@@ -38,33 +46,32 @@ my $num_vars = 0;
 # Hash para permitir a conversão do arquivo de saída para a cnf
 my %cnf;
 
-sub firstidx{
-    
-    my $quem = shift;
-    my $ondeRef = shift;
-    my @onde = @$ondeRef;
-
 # Contadores
 my $k;
 my $i;
 my $j;
 my $l;
 
-    my $pos = 0;
-
-    while(1){
-	if($onde[$pos] eq $quem){ return $pos; }
-	if($pos >= @onde){ return -1; }
-	$pos++;
-    }
-    
-}
-
+# Vetor usado para a conversão para a cnf
 my @vars;
 
-#my $bla = firstidx("comigo",\@hue
-#my $c = firstidx { $_ eq "-c" } @ARGV;
+# Parâmetros passados para o programa
 my $c = firstidx("-c",\@ARGV);
+my $s = firstidx("-s",\@ARGV);
+
+
+
+
+
+
+
+
+#################################################################################
+#
+# Execução
+#
+#################################################################################
+
 
 # Lê cada linha do arquivo de entrada
 while (<>) {
@@ -237,13 +244,11 @@ if($s >= 0) {
 
 
 
-#
-#
+#################################################################################
 #
 #  Implementação das funções
 #
-#
-#
+#################################################################################
 
 
 
@@ -388,6 +393,28 @@ sub imprime {
 }
 
 
+
+
+
+
+
+# Subrotina simples para determinar o índice da primeira ocorrência de uma string
+# em um vetor de strings. Caso não haja nenhuma, retorna -1.
+sub firstidx{
+    
+    my $quem = shift;
+    my $ondeRef = shift;
+    my @onde = @$ondeRef;
+    
+    my $pos = 0;
+    
+    while(1){
+        if($onde[$pos] eq $quem){ return $pos; }
+        if($pos >= @onde){ return -1; }
+        $pos++;
+    }
+    
+}
 
 
 
