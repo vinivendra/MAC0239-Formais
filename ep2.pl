@@ -10,7 +10,7 @@
 # GG
 
 use warnings;
-use List::MoreUtils qw(firstidx);
+#use List::MoreUtils qw(firstidx);
 
 
 # Hash que guarda os nomes das variáveis (keys) e seus valores
@@ -159,7 +159,8 @@ if ($c >= 0) {
         
         # A cada cláusula achada, faz a substituição
         while ($a =~ /([a-z]+\([^a-z]+\))/) {
-            $i = firstidx { $_ eq $1 } @vars;
+            #$i = firstidx { $_ eq $1 } @vars;
+	    $i = firstidx($1,\@vars);
             $i++;
             $a =~ s/[a-z]+\([^a-z]+\)/$i/;
         }
