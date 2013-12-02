@@ -38,9 +38,11 @@ my $num_vars = 0;
 # Hash para permitir a conversão do arquivo de saída para a cnf
 my %cnf;
 
-# Presença (ou ausência) dos parâmetros opcionais
-my $c = firstidx { $_ eq "-c" } @ARGV;
-my $s = firstidx { $_ eq "-s" } @ARGV;
+sub firstidx{
+    
+    my $quem = shift;
+    my $ondeRef = shift;
+    my @onde = @$ondeRef;
 
 # Contadores
 my $k;
@@ -48,10 +50,21 @@ my $i;
 my $j;
 my $l;
 
+    my $pos = 0;
 
+    while(1){
+	if($onde[$pos] eq $quem){ return $pos; }
+	if($pos >= @onde){ return -1; }
+	$pos++;
+    }
+    
+}
 
 my @vars;
 
+#my $bla = firstidx("comigo",\@hue
+#my $c = firstidx { $_ eq "-c" } @ARGV;
+my $c = firstidx("-c",\@ARGV);
 
 # Lê cada linha do arquivo de entrada
 while (<>) {
@@ -151,6 +164,8 @@ if ($c >= 0) {
     @vars = sort keys %cnf;
     
     my $var;
+    my @vars = sort keys %cnf;
+   
     $k = 0;
     
     # Percorre a saída e vai substituindo as cláusulas pelos números
